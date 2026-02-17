@@ -50,4 +50,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Rol::class);
     }
+
+    public function ventas()
+    {
+        return $this->hasMany(Venta::class);
+    }
+
+    public function usuariosLibros()
+    {
+        return $this->hasMAny(UsuarioLibro::class);
+    }
 }
