@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Venta extends Model
 {
-    protected $table = 'ventas';
-
     protected $fillable = [
         'fecha_venta',
         'total',
@@ -15,6 +13,11 @@ class Venta extends Model
         'token_pasarela',
         'user_id',
         'metodo_pago_id'
+    ];
+
+    protected $casts = [
+        'fecha_venta' => 'date',
+        'total' => 'decimal:2'
     ];
 
     public function user()
@@ -27,7 +30,7 @@ class Venta extends Model
         return $this->belongsTo(MetodoPago::class);
     }
 
-    public function detalles()
+    public function detalleVentas()
     {
         return $this->hasMany(DetalleVenta::class);
     }
