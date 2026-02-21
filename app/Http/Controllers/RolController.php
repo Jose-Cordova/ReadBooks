@@ -25,7 +25,7 @@ class RolController extends Controller
         //En caso de que haya error
         catch(\Exception $e){
             return response()->json([
-                'message' => 'Error al obtenber los roles',
+                'message' => 'Error al obtenber los roles.',
                 'error' => $e->getMessage()
             ],500);
         }
@@ -37,6 +37,7 @@ class RolController extends Controller
     public function store(Request $request)
     {
         try{
+            //Validamos que el nombre ingresado sea correcto y no se repita
             $request->validate(
                 [
                     'nombre' => 'required|string|min:3|max:90|unique:roles,nombre'
@@ -45,19 +46,27 @@ class RolController extends Controller
                     'nombre.unique' => 'Ya existe un rol con este nombre.'
                 ]
             );
+            //Creamos el rol y lo retornamos
             $rol = Rol::create([
                 'nombre' => $request->nombre
             ]);
             return response()->json([
                 'message' => 'Rol  registrado correctamente.',
                 'rol' => $rol
-            ],200);
+            ],201);
         }
+        //En caso de que haya errores a la hora de validar
         catch(ValidationException $e){
-
+            return response()->json([
+                'message' => 'Error de validacion.',
+                'error' => $e->errors()
+            ],422);
         }
+        //En caso de error en el servidor
         catch(\Exception $e){
-
+            return response()->json([
+                'message' => 'Error interno en el servidor.'
+            ],500);
         }
     }
 
@@ -74,14 +83,13 @@ class RolController extends Controller
         //En caso de que no exista el rol
         catch(ModelNotFoundException $e){
             return response()->json([
-                'message' => 'Rol no encontrado con el ID = ' .$id
+                'message' => 'Rol no encontrado.'
             ],404);
         }
         //En caso de que haya error
         catch(\Exception $e){
             return response()->json([
-                'message' => 'Error al obtener el rol',
-                'error' => $e->getMessage()
+                'message' => 'Error al obtener el rol.'
             ],500);
         }
     }
@@ -91,7 +99,40 @@ class RolController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try{
+            //Obtenemos el registro de la DB
+            $rol = Rol::findOrFail($id);
+            //Aplicamos la validacion para obtener datos correctos
+            $request->validate(
+                [
+                    'nombre' => [
+                        'required',
+                        'string',
+                        'min:3',
+                        'max:90',
+                        //Se verefica el nombre y se ignora el registro actual para evitar que se marque como repetido
+                        Rule::unique('roles', 'nombre')->ignore($id)
+                    ]
+                ],
+                [
+                    'nombre.unique' => 'Ya existe un rol con este nombre.'
+                ]
+            );
+            //Actualizamos el rol y se retorna
+            $rol->update([
+                'nombre' => $request->nombre
+            ]);
+            return response()->json([
+                'message' => 'Rol actaulizado correctamente.',
+                'rol' => $rol
+            ],200);
+        }
+        //En caso de que no exista el rol
+        catch(ModelNotFoundException $e){
+            return response()->json([
+                'message' => 'Rol no encontrado.'
+            ],500);
+        }
     }
 
     /**
@@ -99,6 +140,20 @@ class RolController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try{
+            //Obtenemos el id junto con users
+            $rol = Rol::findOrFail($id);
+            //Eliminamos el rol y retornamos
+            $rol->delete();
+            return response()->json([
+                'message' => 'Rol eliminado correctamente.'
+            ],200);
+        }
+        //En caso de que no exista el rol
+        catch(ModelNotFoundException $e){
+            return response()->json([
+                'message' => 'Rol no encontrado.'
+            ],404);
+        }
     }
 }
