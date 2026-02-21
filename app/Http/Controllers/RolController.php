@@ -133,6 +133,12 @@ class RolController extends Controller
                 'message' => 'Rol no encontrado.'
             ],500);
         }
+        //En caso de errores inesperados
+        catch(\Exception $e){
+            return response()->json([
+                'message' => 'Error interno en el servidor.'
+            ],500);
+        }
     }
 
     /**
@@ -154,6 +160,12 @@ class RolController extends Controller
             return response()->json([
                 'message' => 'Rol no encontrado.'
             ],404);
+        }
+        //En caso de errores inesperados
+        catch(\Exception $e){
+            return response()->json([
+                'message' => 'Error interno en el servidor.'
+            ],500);
         }
     }
 }
