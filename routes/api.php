@@ -7,9 +7,6 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\MetodoPagoContoller;
 use App\Http\Controllers\CategoriaController;
 
-
-
-
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
