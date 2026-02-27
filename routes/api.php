@@ -13,7 +13,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 //Rutas para los controladores
-Route::apiResource('roles', RolController::class);
 Route::apiResource('metodos_pagos', MetodoPagoContoller::class);
 Route::apiResource('categorias', CategoriaController::class);
 Route::apiResource('autores', AutorController::class);
