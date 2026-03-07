@@ -21,7 +21,7 @@ class AuthController extends Controller
         if(!$token = Auth::attempt($credenciales)){
            return response()->json([
             'message'=> 'Credenciales inválidas'
-           ], 401);     
+           ], 401);
         }
 
         // en caso de exitoso retornamos el token
@@ -63,7 +63,7 @@ class AuthController extends Controller
       return response()->json([
           'access_token' => $token,
           'token_type' => 'bearer',
-          'user' => auth()->user(),
+          'user' => auth()->user()->load('roles'),
           'expires_in' => auth()->factory()->getTTL() * 60
       ]);
     }
