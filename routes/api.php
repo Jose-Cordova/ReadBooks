@@ -11,6 +11,7 @@ use App\Http\Controllers\AutorController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\UsuarioLibroController;
+use App\Http\Controllers\LibroController;
 //Controlador de pasarela de pago
 use App\Http\Controllers\StripeWebhookController;
 
@@ -37,6 +38,7 @@ Route::post('/webhook', [StripeWebhookController::class, 'procesarPago']);
 Route::apiResource('metodos_pagos', MetodoPagoContoller::class);
 Route::apiResource('categorias', CategoriaController::class);
 Route::apiResource('autores', AutorController::class);
+Route::apiResource('libros', LibroController::class);
 
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('ventas', VentaController::class);
