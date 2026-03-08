@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-//Modelos a usar 
+//Modelos a usar
 use App\Models\Venta;
-use App\Models\DetalleVenta;
 use App\Models\UsuarioLibro;
 use App\Models\Libro;
 //Conroladoress para la pasarela de pago
@@ -91,52 +89,16 @@ class VentaController extends Controller
             $librosCard = Libro::whereIn('id', $librosUsuario)->get();
             $totalPagar = $librosCard->sum('precio_actual');
 
-            //Iniciamos la transaccion
-            DB::beginTransaction();
-            //Creamos la venta
-            $venta = Venta::create([
-                'fecha_venta' => now(),
-                'total' => $totalPagar,
-                'estado_pago' => 'pendiente',
-                'token_pasarela' => 'PENDIENTE', 
-                'metodo_pago_id' => $request->metodo_pago_id,
-                'user_id' => auth('api')->id()
-            ]);
-            // Llamamos al PaymentController para crear el PaymentIntent en Stripe
+            //LLamamos al PaymentController para crear el intento de pago y mandar los datos a stripe
             $stripe = new PaymentController();
-            $clientSecret = $stripe->crearPaymentIntent($venta);
-            //Preparamos las variables para una insercion masiva
-            $detallesVentas = [];
-            $entregaLibro = [];
-            //Recorremos los libros comprados para llenar el detalle venta
-            foreach($librosCard as $libro){
-                $detallesVentas[] = [
-                    'precio_unitario' => $libro->precio_actual,
-                    'subtotal' => $libro->precio_actual,
-                    'libro_id' => $libro->id,
-                    'venta_id' => $venta->id,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-                //Hacer entrega de los libros
-                $entregaLibro[] =[
-                    'pagina_actual' => 0,
-                    'porcentaje_leido' => 0.00,
-                    'estado' => 'pendiente',
-                    'user_id' => auth('api')->user()->id,
-                    'libro_id' => $libro->id,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-            }
-            //Insercionmasiva de los datos a la DB
-            DetalleVenta::insert($detallesVentas);
-            UsuarioLibro::insert($entregaLibro);
-
-            //Si todo salio bien guardar en la base de datos
-            DB::commit();
+            $clientSecret = $stripe->crearPaymentIntent(new Request([
+                'total' => $totalPagar,
+                'user_id' => auth('api')->user()->id,
+                'libro_id' => $librosUsuario,
+                'metodo_pago_id' => $request->metodo_pago_id
+            ]));
+            //Retornamos el client secret
             return response()->json([
-                'venta_id' => $venta->id,
                 'client_secret' => $clientSecret
             ],201);
 
@@ -147,10 +109,8 @@ class VentaController extends Controller
             ],422);
         }
         catch(\Exception $e){
-            //Si falla se revierte la transaccion
-            DB::rollBack();
             return response()->json([
-                'message' => 'Error al crear la venta',
+                'message' => 'Error interno del servidor',
                 'error' => $e->getMessage()
             ],500);
         }

@@ -34,13 +34,28 @@ Route::prefix('auth')->group(function(){
 
 //Ruta para la pasarela de pago
 Route::post('/webhook', [StripeWebhookController::class, 'procesarPago']);
-//Rutas para los controladores
-Route::apiResource('metodos_pagos', MetodoPagoContoller::class);
-Route::apiResource('categorias', CategoriaController::class);
-Route::apiResource('autores', AutorController::class);
-Route::apiResource('libros', LibroController::class);
+//Rutas publicas
+Route::get('libros', [LibroController::class, 'index']);
+Route::get('libros/{id}', [LibroController::class, 'show']);
+Route::get('categorias', [CategoriaController::class, 'index']);
 
-Route::middleware('auth:api')->group(function () {
-    Route::apiResource('ventas', VentaController::class);
+//Rutas protegidas para el admin
+Route::middleware(['auth:api', 'role:ADMIN'])->group(function() {
+    Route::get('ventas', [VentaController::class, 'index']);
+    Route::post('libros', [LibroController::class, 'store']);
+    Route::put('libros/{id}', [LibroController::class, 'update']);
+    Route::delete('libros/{id}', [LibroController::class, 'destroy']);
+    Route::post('categorias', [CategoriaController::class, 'store']);
+    Route::put('categorias/{id}', [CategoriaController::class, 'update']);
+    Route::delete('categorias/{id}', [CategoriaController::class, 'destroy']);
+    Route::post('metodos_pagos', [MetodoPagoContoller::class, 'store']);
+    Route::put('metodos_pagos/{id}', [MetodoPagoContoller::class, 'update']);
+    Route::delete('metodos_pagos/{id}', [MetodoPagoContoller::class, 'destroy']);
+    Route::apiResource('autores', AutorController::class);
+});
+//Rutas para clientes autenticados
+Route::middleware(['auth:api', 'role:CLIENTE'])->group(function () {
+    Route::get('metodos_pagos', [MetodoPagoContoller::class, 'index']);
+    Route::post('ventas', [VentaController::class, 'store']);
     Route::apiResource('usuarios_libros', UsuarioLibroController::class);
 });
