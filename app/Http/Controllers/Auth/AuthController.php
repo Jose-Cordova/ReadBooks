@@ -47,6 +47,8 @@ class AuthController extends Controller
           'password' => Hash::make($request->password)
       ]);
        $user->assignRole('CLIENTE');
+       //Se añade el rol al usuario
+       $user->load('roles');
       // generamos el token
       $token = JWTAuth::fromUser($user);
 
