@@ -8,7 +8,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
-
 class LibroController extends Controller
 {
     /**
@@ -127,11 +126,12 @@ class LibroController extends Controller
             $request->validate(
                 [
                 'titulo' => 'required|string|min:3|max:100|unique:libros,titulo,' . $id,
+                'descripcion' => 'required|string',
                 'precio_actual' => 'required|numeric|min:0',
                 'imagen'        => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
                 'archivo'       => 'nullable|file|mimes:pdf|max:20480',
                 'categoria_id' => 'required|exists:categorias,id',
-                'autor_id' => 'required|exists:autores,id',
+                'autor_id' => 'required|exists:autores,id'
                 ],
                 [
                     'titulo.unique' => 'Este título ya está siendo usado por otro libro.'
