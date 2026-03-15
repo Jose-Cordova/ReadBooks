@@ -125,7 +125,7 @@ class LibroController extends Controller
             // Validamos los datos nuevos
             $request->validate(
                 [
-                'titulo' => 'required|string|min:3|max:100|unique:libros,titulo' . $id,
+                'titulo' => 'required|string|min:3|max:100|unique:libros,titulo,' . $id,
                 'descripcion' => 'required|string',
                 'precio_actual' => 'required|numeric|min:0',
                 'imagen'        => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
@@ -135,8 +135,7 @@ class LibroController extends Controller
                 ],
                 [
                     'titulo.unique' => 'Este título ya está siendo usado por otro libro.'
-                ]
-                );
+                ]);
 
             //si se manda una nueva imagen se remplaza la anterior
             if ($request->hasFile('imagen')){
