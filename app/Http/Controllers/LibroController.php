@@ -35,15 +35,19 @@ class LibroController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'titulo' => 'required|string|min:3|max:100',
+            $request->validate(
+                [
+                'titulo' => 'required|string|min:3|max:100|unique:libros,titulo',
                 'descripcion' => 'required|string',
                 'precio_actual' => 'required|numeric|min:0',
                 'imagen' => 'required|file|mimes:jpg,jpeg,png,webp|max:2048',
                 'archivo'=> 'required|file|mimes:pdf|max:20480',
                 'categoria_id' => 'required|exists:categorias,id',
                 'autor_id' => 'required|exists:autores,id'
-            ]);
+                ],
+                [
+                    'titulo.unique' => 'Ya existe un libro con este título en el catálogo.'
+                ]);
             //guardamos imagenes
             $imagen = $request->file('imagen');
             $nombreImagen = time(). '_'. $imagen->getClientOriginalName();
@@ -90,12 +94,12 @@ class LibroController extends Controller
         try {
             // buscar el libro por su id
             $libro = Libro::with(['autor', 'categoria'])->findOrFail($id);
-            
+
             // si el libro existe con ese id
             return response()->json($libro, 200);
 
         } catch (ModelNotFoundException $e) {
-            // si el libro no existe con ese id 
+            // si el libro no existe con ese id
             return response()->json([
                 'message' => 'No existe libro con el ID ' . $id
             ], 404);
@@ -115,19 +119,24 @@ class LibroController extends Controller
     {
         try {
 
-            // Primero buscamos el libro por el id 
+            // Primero buscamos el libro por el id
             $libro = Libro::findOrFail($id);
 
             // Validamos los datos nuevos
-            $request->validate([
-                'titulo' => 'required|string|min:3|max:100',
+            $request->validate(
+                [
+                'titulo' => 'required|string|min:3|max:100|unique:libros,titulo' . $id,
                 'descripcion' => 'required|string',
                 'precio_actual' => 'required|numeric|min:0',
                 'imagen'        => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
                 'archivo'       => 'nullable|file|mimes:pdf|max:20480',
                 'categoria_id' => 'required|exists:categorias,id',
                 'autor_id' => 'required|exists:autores,id'
-            ]);
+                ],
+                [
+                    'titulo.unique' => 'Este título ya está siendo usado por otro libro.'
+                ]
+                );
 
             //si se manda una nueva imagen se remplaza la anterior
             if ($request->hasFile('imagen')){
@@ -171,7 +180,7 @@ class LibroController extends Controller
 
             // Si el libro no existe
             return response()->json([
-                'message' => 'Libro no encontrado con ID' .id
+                'message' => 'Libro no encontrado con ID' .$id
             ], 404);
 
         } catch (ValidationException $e) {
@@ -246,7 +255,7 @@ class LibroController extends Controller
 
             // Si el libro no existe
             return response()->json([
-                'message' => 'Libro no encontrado con el ID'. id
+                'message' => 'Libro no encontrado con el ID'. $id
             ], 404);
 
         } catch (\Exception $e) {
