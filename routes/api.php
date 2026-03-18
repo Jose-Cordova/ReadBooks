@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\UsuarioLibroController;
 use App\Http\Controllers\LibroController;
+use App\Http\Controllers\ReporteController;
 //Controlador de pasarela de pago
 use App\Http\Controllers\StripeWebhookController;
 
@@ -52,6 +53,7 @@ Route::middleware(['auth:api', 'role:ADMIN'])->group(function() {
     Route::put('metodos_pagos/{id}', [MetodoPagoContoller::class, 'update']);
     Route::delete('metodos_pagos/{id}', [MetodoPagoContoller::class, 'destroy']);
     Route::apiResource('autores', AutorController::class);
+
 });
 //Rutas para clientes autenticados
 Route::middleware(['auth:api', 'role:CLIENTE'])->group(function () {
@@ -59,3 +61,5 @@ Route::middleware(['auth:api', 'role:CLIENTE'])->group(function () {
     Route::post('ventas', [VentaController::class, 'store']);
     Route::apiResource('usuarios_libros', UsuarioLibroController::class);
 });
+//rutas para reportes, para poder generar el pdf
+Route::get('/reportes/ventas', [ReporteController::class, 'reporteVentas']);
