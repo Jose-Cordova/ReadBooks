@@ -21,10 +21,12 @@ class UsuarioLibroController extends Controller
             $libros = UsuarioLibro::with('libro.autor')->where('user_id', auth('api')->user()->id)->get()
             ->map(function($usuarioLibro){
                 return [
+                    'id' => $usuarioLibro->libro->id,
                     'titulo' => $usuarioLibro->libro->titulo,
                     'autor' => $usuarioLibro->libro->autor->nombre_completo,
                     'progreso' => $usuarioLibro->porcentaje_leido,
-                    'estado' => $usuarioLibro->estado
+                    'estado' => $usuarioLibro->estado,
+                    'url_imagen' => $usuarioLibro->libro->url_imagen
                 ];
             });
             //Retornamos los libros
